@@ -94,7 +94,7 @@ class PDFKit
     end
   
     def style_tag_for(stylesheet)
-      "<style>#{File.read(stylesheet)}</style>"
+      "<style>#{absolute_paths(File.read(stylesheet))}</style>"
     end
     
     def append_stylesheets
@@ -131,6 +131,16 @@ class PDFKit
       else
         value.to_s
       end
+    end
+    
+    def absolute_paths(body)
+      root = "#{Rails.root}/public/"
+
+      body.gsub!(/(url)\(\/([^\)]*|[^)]*)/,'\1('+root+'\2')
+
+      return body
+    rescue NameError
+      return body
     end
   
 end

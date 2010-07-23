@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+
 describe PDFKit do
   
   context "initialization" do
@@ -124,6 +125,25 @@ describe PDFKit do
       pdfkit.stylesheets << css
       pdfkit.to_pdf
       pdfkit.source.to_s.should include("<style>#{File.read(css)}</style><html>")
+    end
+    
+    it "should reference an absolute path to urls in an attached css file if a Rails project" do
+      fake_rails = Proc.new do
+        class PDFKit
+          class Rails
+            def self.root
+              "TEST_SPEC"
+            end
+          end
+        end
+        
+        pdfkit = PDFKit.new("<html><body>Hai!</body></html>")
+        css = File.join(SPEC_ROOT,'fixtures','example.css')
+        pdfkit.stylesheets << css
+        pdfkit.to_pdf
+        pdfkit.source.to_s.should include("url(TEST_SPEC")
+      end
+      fake_rails.call
     end
     
     it "should throw an error if the source is not html and stylesheets have been added" do
